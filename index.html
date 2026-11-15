@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>عالم رحومة الترفيهي ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4757;
+            --secondary: #ff6b81;
+            --accent: #ffd32a;
+            --bg-dark: #0b050d;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, #260d29 0%, var(--bg-dark) 70%);
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        /* خلفية متحركة */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(15, 7, 18, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-weight: 900;
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, #ff758c, #ffd32a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .music-btn {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.3s;
+        }
+
+        .music-btn.playing {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+        }
+
+        /* شريط التقدم */
+        .progress-container {
+            width: 92%;
+            max-width: 460px;
+            margin: 15px auto;
+            z-index: 10;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #bbb;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 25%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* قائمة التنقل بين الألعاب */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            width: 92%;
+            max-width: 460px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            z-index: 10;
+            scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 85px;
+            padding: 10px 8px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: #ccc;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .tab-btn.done::after {
+            content: ' ✓';
+            color: var(--accent);
+        }
+
+        /* حاوية الأقسام */
+        .section-card {
+            display: none;
+            position: relative;
+            z-index: 10;
+            width: 92%;
+            max-width: 460px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 26px;
+            padding: 25px 20px;
+            margin-top: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        .section-card.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sec-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .sec-desc {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.3);
+            transition: transform 0.2s;
+            margin-top: 15px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .next-stage-btn {
+            background: linear-gradient(45deg, #2ed573, #1e90ff);
+            box-shadow: 0 8px 20px rgba(46, 213, 115, 0.3);
+            display: none;
+        }
+
+        /* --- القسم 1: رادار العند --- */
+        .radar-box {
+            width: 180px;
+            height: 180px;
+            margin: 15px auto;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 71, 87, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle, rgba(255,71,87,0.15) 0%, transparent 70%);
+        }
+
+        .radar-percent {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .radar-result-box {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 15px;
+            border-radius: 16px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- القسم 2: لعبة تجميع القلوب --- */
+        #catch-game-area {
+            width: 100%;
+            height: 320px;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 117, 140, 0.3);
+            touch-action: none;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 0.95rem;
+            z-index: 5;
+        }
+
+        #player-basket {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.4rem;
+            transition: left 0.05s linear;
+        }
+
+        .falling-item {
+            position: absolute;
+            top: -30px;
+            font-size: 1.6rem;
+        }
+
+        /* --- القسم 3: عجلة التحديات --- */
+        .wheel-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+            margin: 15px auto;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            z-index: 10;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5));
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid #fff;
+            background: conic-gradient(
+                #ff4757 0deg 60deg,
+                #ffa502 60deg 120deg,
+                #2ed573 120deg 180deg,
+                #1e90ff 180deg 240deg,
+                #a55eea 240deg 300deg,
+                #ff6b81 300deg 360deg
+            );
+            transition: transform 3.5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .wheel-center {
+            width: 55px;
+            height: 55px;
+            background: #fff;
+            border-radius: 50%;
+            color: var(--bg-dark);
+            font-weight: 900;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        /* --- القسم 4: اختبار المشاغبة --- */
+        .quiz-option {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: right;
+            transition: 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 71, 87, 0.25);
+            border-color: var(--primary);
+        }
+
+        /* --- شاشة النهاية (VIP Card) --- */
+        #final-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .vip-card {
+            background: linear-gradient(135deg, #1f0c24 0%, #3b1236 100%);
+            border: 2px solid var(--accent);
+            border-radius: 28px;
+            padding: 30px 22px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 211, 42, 0.35);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .vip-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            font-weight: 900;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+        <div class="brand">عالم رحومة ✨</div>
+        <button class="music-btn" id="music-toggle" onclick="toggleMusic()">
+            <span id="music-icon">🎵</span>
+            <span id="music-text">شغلي المزيكا</span>
+        </button>
+    </div>
+
+    <!-- شريط التقدم -->
+    <div class="progress-container">
+        <div class="progress-labels">
+            <span>تقدمك في التحديات</span>
+            <span id="progress-text">1 / 4</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- أزرار التنقل -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="tab-1" onclick="switchTab(1)">1. رادار العند</button>
+        <button class="tab-btn" id="tab-2" onclick="switchTab(2)">2. اجمعي القلوب</button>
+        <button class="tab-btn" id="tab-3" onclick="switchTab(3)">3. عجلة الحظ</button>
+        <button class="tab-btn" id="tab-4" onclick="switchTab(4)">4. الاختبار</button>
+    </div>
+
+    <!-- المرحلة 1: رادار العند -->
+    <div class="section-card active" id="sec-1">
+        <div class="sec-title">رادار العند والتنكد 📡</div>
+        <div class="sec-desc">خلينا نشوف نسبة عندك مع يوسف النهارده وصلت لكام</div>
+        
+        <div class="radar-box">
+            <div class="radar-percent" id="radar-num">0%</div>
+            <div style="font-size: 0.8rem; color: #ddd;">نسبة العند</div>
+        </div>
+
+        <div class="radar-result-box" id="radar-msg">
+            دوسي على الزرار تحت عشان الجهاز يفحص حالتك 😂
+        </div>
+
+        <button class="action-btn" onclick="scanStubbornness()">افحصي حالتي دلوقتي 🔍</button>
+        <button class="action-btn next-stage-btn" id="next-1" onclick="completeStage(1, 2)">كملي للمرحلة التانية ⬅️</button>
+    </div>
+
+    <!-- المرحلة 2: لعبة تجميع القلوب -->
+    <div class="section-card" id="sec-2">
+        <div class="sec-title">تحدي التركيز السريع 🎮</div>
+        <div class="sec-desc">حركي السلة بصابعك واجمعي 10 قلوب، وابعدي عن القنابل 💣</div>
+        
+        <div id="catch-game-area">
+            <div class="game-hud">
+                <span>القلوب: <b id="score-val" style="color: #ff4757;">0</b> / 10</span>
+                <span id="game-status">جاهزة؟</span>
+            </div>
+            <div id="player-basket">🧺</div>
+        </div>
+
+        <button class="action-btn" id="start-catch-btn" onclick="startCatchGame()">ابدئي اللعب 🚀</button>
+        <button class="action-btn next-stage-btn" id="next-2" onclick="completeStage(2, 3)">عاش! ادخلي على العجلة ⬅️</button>
+    </div>
+
+    <!-- المرحلة 3: عجلة التحديات -->
+    <div class="section-card" id="sec-3">
+        <div class="sec-title">عجلة أوامر الشات 🎡</div>
+        <div class="sec-desc">لفي العجلة واللي يطلعلك لازم تنفذيه في الشات حالاً!</div>
+        
+        <div class="wheel-container">
+            <div class="wheel-pointer">🔻</div>
+            <div id="wheel">
+                <div class="wheel-center">لفي</div>
+            </div>
+        </div>
+
+        <div class="radar-result-box" id="wheel-result">
+            اضغطي "لفي العجلة" وشوفي حظك هيوقعك في إيه 😎
+        </div>
+
+        <button class="action-btn" id="spin-btn" onclick="spinWheel()">لفي العجلة 🎲</button>
+        <button class="action-btn next-stage-btn" id="next-3" onclick="completeStage(3, 4)">آخر مرحلة.. يلا بينا ⬅️</button>
+    </div>
+
+    <!-- المرحلة 4: اختبار المشاغبة -->
+    <div class="section-card" id="sec-4">
+        <div class="sec-title">اختبار الصراحة السريع 🧠</div>
+        <div class="sec-desc" id="quiz-progress">سؤال 1 من 3</div>
+        
+        <h3 id="quiz-question" style="text-align: center; margin-bottom: 18px; font-size: 1.1rem; color: var(--accent);"></h3>
+        <div id="quiz-options"></div>
+        
+        <div class="radar-result-box" id="quiz-feedback" style="display: none;"></div>
+    </div>
+
+    <!-- شاشة النهاية VIP -->
+    <div id="final-modal">
+        <div class="vip-card">
+            <div class="vip-badge">VIP PASS • شهادة رسمية</div>
+            <div style="font-size: 3.5rem; margin-bottom: 10px;">👑❤️</div>
+            <h2 style="color: #fff; margin-bottom: 10px;">مبروك يا رحومة!</h2>
+            <p style="color: #ddd; font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px;">
+                خلصتي كل التحديات بنجاح وأثبتي إنك ملكة التركيز والعند في نفس الوقت 😂❤️<br><br>
+                <b>خدي الصفحة دي سكرين شوت وابعتيها ليوسف في الشات دلوقتي عشان تاخدي جايزتك!</b>
+            </p>
+            <button class="action-btn" onclick="document.getElementById('final-modal').style.display='none'">الرجوع للألعاب 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. خلفية النجوم والقلوب المتحركة (Canvas)
+        ========================================= */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 45; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3 + 1,
+                speedY: Math.random() * 0.6 + 0.2,
+                opacity: Math.random() * 0.6 + 0.2
+            });
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.fillStyle = `rgba(255, 117, 140, ${p.opacity})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                p.y -= p.speedY;
+                if (p.y < 0) p.y = canvas.height;
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        /* =========================================
+           2. آلة موسيقية مدمجة (Web Audio API)
+        ========================================= */
+        let audioCtx = null;
+        let isPlaying = false;
+        let musicInterval = null;
+        const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 493.88, 392.00, 329.63];
+        let noteIdx = 0;
+
+        function playSoftNote(freq) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.2);
+        }
+
+        function toggleMusic() {
+            const btn = document.getElementById('music-toggle');
+            const txt = document.getElementById('music-text');
+            
+            if (!isPlaying) {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                isPlaying = true;
+                btn.classList.add('playing');
+                txt.innerText = 'شغالة 🎶';
+                
+                playSoftNote(notes[noteIdx]);
+                noteIdx = (noteIdx + 1) % notes.length;
+                musicInterval = setInterval(() => {
+                    playSoftNote(notes[noteIdx]);
+                    noteIdx = (noteIdx + 1) % notes.length;
+                }, 650);
+            } else {
+                isPlaying = false;
+                btn.classList.remove('playing');
+                txt.innerText = 'شغلي المزيكا';
+                clearInterval(musicInterval);
+            }
+        }
+
+        /* =========================================
+           3. التنقل والتقدم بين المراحل
+        ========================================= */
+        let completedStages = new Set();
+
+        function switchTab(stageNum) {
+            document.querySelectorAll('.section-card').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`sec-${stageNum}`).classList.add('active');
+            document.getElementById(`tab-${stageNum}`).classList.add('active');
+        }
+
+        function completeStage(current, next) {
+            completedStages.add(current);
+            document.getElementById(`tab-${current}`).classList.add('done');
+            
+            const percent = Math.min(100, (completedStages.size + 1) * 25);
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = `${Math.min(4, completedStages.size + 1)} / 4`;
+            
+            switchTab(next);
+        }
+
+        /* =========================================
+           4. المرحلة 1: رادار العند
+        ========================================= */
+        const radarOutcomes = [
+            { pct: 98, msg: "تحذير! نسبة العند 98%.. يفضل يوسف يكلمك بهدوء النهارده ويجيبلك حاجة حلوة 😂🍫" },
+            { pct: 85, msg: "85% عند.. دماغك ناشفة بس قلبك أبيض وبترضي بكلمة حلوة ❤️" },
+            { pct: 100, msg: "100% قفلت العداد! مفيش نقاش معاكِ النهارده، كلامك هو اللي هيمشي 👑" }
+        ];
+
+        function scanStubbornness() {
+            const numEl = document.getElementById('radar-num');
+            const msgEl = document.getElementById('radar-msg');
+            const chosen = radarOutcomes[Math.floor(Math.random() * radarOutcomes.length)];
+            
+            let current = 0;
+            msgEl.innerText = "جاري فحص الدماغ الناشفة... ⏳";
+            
+            const timer = setInterval(() => {
+                current += 4;
+                if (current >= chosen.pct) {
+                    current = chosen.pct;
+                    clearInterval(timer);
+                    msgEl.innerText = chosen.msg;
+                    document.getElementById('next-1').style.display = 'block';
+                }
+                numEl.innerText = current + '%';
+            }, 35);
+        }
+
+        /* =========================================
+           5. المرحلة 2: لعبة تجميع القلوب
+        ========================================= */
+        let catchRunning = false;
+        let catchScore = 0;
+        let spawnTimer = null;
+
+        const gameArea = document.getElementById('catch-game-area');
+        const basket = document.getElementById('player-basket');
+
+        function moveBasket(clientX) {
+            const rect = gameArea.getBoundingClientRect();
+            let x = clientX - rect.left;
+            x = Math.max(25, Math.min(rect.width - 25, x));
+            basket.style.left = x + 'px';
+        }
+
+        gameArea.addEventListener('touchmove', e => {
+            if (!catchRunning) return;
+            e.preventDefault();
+            moveBasket(e.touches[0].clientX);
+        }, { passive: false });
+
+        gameArea.addEventListener('mousemove', e => {
+            if (!catchRunning) return;
+            moveBasket(e.clientX);
+        });
+
+        function startCatchGame() {
+            if (catchRunning) return;
+            catchRunning = true;
+            catchScore = 0;
+            document.getElementById('score-val').innerText = '0';
+            document.getElementById('game-status').innerText = 'اجمعي بسرعة!';
+            document.getElementById('start-catch-btn').style.display = 'none';
+
+            spawnTimer = setInterval(() => {
+                if (!catchRunning) return;
+                const item = document.createElement('div');
+                item.classList.add('falling-item');
+                const isBomb = Math.random() < 0.28;
+                item.innerText = isBomb ? '💣' : '❤️';
+                item.style.left = (Math.random() * (gameArea.clientWidth - 40) + 10) + 'px';
+                gameArea.appendChild(item);
+
+                let posY = -30;
+                const speed = Math.random() * 2.5 + 3;
+
+                const fallInterval = setInterval(() => {
+                    if (!catchRunning) {
+                        clearInterval(fallInterval);
+                        item.remove();
+                        return;
+                    }
+                    posY += speed;
+                    item.style.top = posY + 'px';
+
+                    const itemRect = item.getBoundingClientRect();
+                    const basketRect = basket.getBoundingClientRect();
+
+                    if (
+                        itemRect.bottom >= basketRect.top + 10 &&
+                        itemRect.top <= basketRect.bottom &&
+                        itemRect.right >= basketRect.left &&
+                        itemRect.left <= basketRect.right
+                    ) {
+                        clearInterval(fallInterval);
+                        item.remove();
+
+                        if (isBomb) {
+                            catchScore = Math.max(0, catchScore - 2);
+                            document.getElementById('game-status').innerText = 'بوم! نقصتي نقطتين 💥';
+                        } else {
+                            catchScore++;
+                            document.getElementById('game-status').innerText = 'عاش يا بطل! 🔥';
+                        }
+                        document.getElementById('score-val').innerText = catchScore;
+
+                        if (catchScore >= 10) {
+                            catchRunning = false;
+                            clearInterval(spawnTimer);
+                            document.getElementById('game-status').innerText = 'كسبتي التحدي 🎉';
+                            document.getElementById('next-2').style.display = 'block';
+                        }
+                    }
+
+                    if (posY > gameArea.clientHeight) {
+                        clearInterval(fallInterval);
+                        item.remove();
+                    }
+                }, 20);
+            }, 650);
+        }
+
+        /* =========================================
+           6. المرحلة 3: عجلة التحديات
+        ========================================= */
+        const challenges = [
+            "الأمر: ابعتي ليوسف فويس نوت دلوقتي وقوليله 'انت أجدع واحد في الدنيا' 🎤😂",
+            "الأمر: صوري أي حاجة جنبك حالاً وابعتيها في الشات من غير ما ترتبي المكان 📸",
+            "الأمر: اعترفي في الشات إنك بتغلسي عليه أكتر ما هو بيغلس عليكي 🤭",
+            "الأمر: عليكي عزومة شيبسي وشوكولاتة أول ما نتقابل 🍫😎",
+            "الأمر: ابعتي أكتر إيموجي بتحبيه في الشات دلوقتي حالاً ✨",
+            "الأمر: كسبتي إعفاء! اطلبي أي طلب من يوسف في الشات وهينفذه 👑"
+        ];
+        let currentDeg = 0;
+
+        function spinWheel() {
+            const btn = document.getElementById('spin-btn');
+            const wheel = document.getElementById('wheel');
+            const resBox = document.getElementById('wheel-result');
+            
+            btn.disabled = true;
+            const extraDeg = Math.floor(Math.random() * 360) + 1440;
+            currentDeg += extraDeg;
+            wheel.style.transform = `rotate(${currentDeg}deg)`;
+            resBox.innerText = "العجلة بتلف... يا ترى هيطلعلك إيه؟ 🤞";
+
+            setTimeout(() => {
+                const chosen = challenges[Math.floor(Math.random() * challenges.length)];
+                resBox.innerText = chosen;
+                btn.disabled = false;
+                btn.innerText = "لفيها تاني 🔄";
+                document.getElementById('next-3').style.display = 'block';
+            }, 3600);
+        }
+
+        /* =========================================
+           7. المرحلة 4: اختبار الصراحة السريع
+        ========================================= */
+        const quizData = [
+            {
+                q: "مين فينا بيبدأ رخامة وهزار على التاني الأول؟",
+                options: [
+                    { text: "أنا طبعاً وبعترف بكده 😇", reply: "الاعتراف بالحق فضيلة فعلاً 😂❤️" },
+                    { text: "يوسف هو اللي بيبدأ دايماً 🙄", reply: "كدابة بس هنعديها عشان خاطرك 😎" }
+                ]
+            },
+            {
+                q: "لو يوسف اتأخر في الرد 5 دقايق، رد فعلك بيكون إيه؟",
+                options: [
+                    { text: "عادي جداً وقلبي أبيض 🌸", reply: "واضح جداً.. ده انتي بتقلبيها تحقيق 😂" },
+                    { text: "بجهزله محضر استجواب 🕵️‍♀️", reply: "أيوه كده خليكي صريحة مع نفسك! 🔥" }
+                ]
+            },
+            {
+                q: "في الآخر بقى.. مين أكتر حد بيفرحك ويهون عليكي يومك؟",
+                options: [
+                    { text: "يوسف طبعاً من غير تفكير ❤️", reply: "إجابة نموذجية 10/10! استعدي للشهادة 🎉" },
+                    { text: "الأكل والنوم 🍕😴", reply: "ماشي يا ست رحمة، هعتبرك قولتي يوسف 😂❤️" }
+                ]
+            }
+        ];
+        let qIndex = 0;
+
+        function renderQuiz() {
+            const item = quizData[qIndex];
+            document.getElementById('quiz-progress').innerText = `سؤال ${qIndex + 1} من ${quizData.length}`;
+            document.getElementById('quiz-question').innerText = item.q;
+            const optsDiv = document.getElementById('quiz-options');
+            optsDiv.innerHTML = '';
+
+            item.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerText = opt.text;
+                btn.onclick = () => handleQuizAnswer(opt.reply);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(replyText) {
+            const fb = document.getElementById('quiz-feedback');
+            fb.style.display = 'flex';
+            fb.innerText = replyText;
+
+            setTimeout(() => {
+                fb.style.display = 'none';
+                qIndex++;
+                if (qIndex < quizData.length) {
+                    renderQuiz();
+                } else {
+                    completedStages.add(4);
+                    document.getElementById('tab-4').classList.add('done');
+                    document.getElementById('final-modal').style.display = 'flex';
+                }
+            }, 1600);
+        }
+
+        renderQuiz();
+    </script>
+</body>
+</html>
